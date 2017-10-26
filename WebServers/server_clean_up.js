@@ -76,20 +76,17 @@ function handle_incoming_request(req, res) {
         // user is requesting contents of an album
         handle_load_album(req, res);
     } else {
-        res.writeHead(404, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ code: "no_such_page", message: "No such page" }));
+        send_failure(res, 404, { code: "no_such_page", message: "No such page" });
     }
 }
 
 function handle_load_album_list(req, res) {
     load_album_list((err, albums) => {
         if (err) {
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ code: "cant_load_albums", message: err.message }));
+            send_failure(res, 500, { code: "cant_load_albums", message: err.message });
         } else {
-            var output = { err: null, data: { albums: albums } };
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(output) + '\n');
+            send_success(res, { albums: albums });
+
         }
     });
 }
@@ -97,12 +94,9 @@ function handle_load_album_list(req, res) {
 function handle_load_album(req, res) {
     load_album(req.url.substr(7, req.url.length - 12), (err, photos) => {
         if (err) {
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(make_resp_error(err));
+            send_failure(res, 500, err);
         } else {
-            var output = { error: null, data: photos };
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(output) + '\n');
+            send_success(res, photos);
         }
     });
 }
@@ -124,5 +118,17 @@ function make_error(code, msg) {
 }
 
 function make_resp_error(err) {
-    return JSON.stringify({ code: err.code, message: err.message });
+    return JSON.stringify({ code: (err.code) ? err.code : err.name, message: err.message });
+}
+
+function send_success(res, data) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    var output = { error: null, data: data };
+    res.end(JSON.stringify(output) + '\n');
+}
+
+function send_failure(res, server_code, err) {
+    var code = (err.code) ? err.code : err.name;
+    res.writeHead(server_code, { "Content-Type": "application/json" });
+    res.end(make_resp_error(err));
 }
