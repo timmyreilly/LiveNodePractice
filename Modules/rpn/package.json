@@ -1,0 +1,7 @@
+{
+    "name" : "rpn", 
+    "description": "reverse polish notation calculator",
+    "version" : "0.0.1", 
+    "main": "lib/rpn.js",
+    "private" : true 
+}
