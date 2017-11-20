@@ -1,0 +1,9 @@
+{
+    "name": "photo_sharing_app",
+    "description": "Photo sharing with express started with express",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "express": "4.x"
+    }
+}
